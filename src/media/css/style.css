@@ -1,0 +1,5 @@
+/* filtered items style */
+div.contentcustomfilter.filtered-item {
+	box-sizing : border-box;
+	border     : 0.25rem outset gold;
+}
