@@ -15,6 +15,7 @@ defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Version;
@@ -123,11 +124,11 @@ class PlgSystemContentcustomfilter extends CMSPlugin
 			//"highlight" filtered items
 			if (!empty($item->introtext))
 			{
-				$item->text = '<div class="contentcustomfilter filtered-item hasTooltip" title="This content matches the filters you provided" target="_blank" rel="noopener">' . $item->text . '</div>';
+				$item->text = '<div class="contentcustomfilter filtered-item hasTooltip" title="'.Text::_('PLG_SYSTEM_CONTENTCUSTOMFILTER_MATCHING_FILTER_TOOLTIP_TEXT').'" target="_blank" rel="noopener">' . $item->text . '</div>';
 			}
 			else
 			{
-				$item->text = '[Filtered] ' . $item->text;
+				$item->text = Text::_('PLG_SYSTEM_CONTENTCUSTOMFILTER_MATCHING_FILTER_WITH_NO_INTROTEXT') . ' ' . $item->text;
 			}
 			
 			// collect filtered items ids

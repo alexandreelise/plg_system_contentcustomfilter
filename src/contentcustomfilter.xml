@@ -1,25 +1,32 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <extension type="plugin" version="3.9" group="system" method="upgrade">
-    <name>plg_system_contentcustomfilter</name>
+    <name>PLG_SYSTEM_CONTENTCUSTOMFILTER</name>
     <author>Alexandre ELISÉ</author>
     <creationDate>2021-03-03</creationDate>
     <copyright>Copyright (C) 2009 - 2021 Alexandre ELISÉ. All rights reserved.</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
     <authorEmail>contact@alexandre-elise.fr</authorEmail>
     <authorUrl>https://coderparlerpartager.fr</authorUrl>
-    <version>2.0.0</version>
-    <description>System - Content Custom Filter. Custom fields filter plugin using Joomla! core features.</description>
+    <version>2.1.0</version>
+    <description>PLG_SYSTEM_CONTENTCUSTOMFILTER_XML_DESCRIPTION</description>
     <scriptfile>script.php</scriptfile>
     <media folder="media" destination="plg_system_contentcustomfilter">
         <folder>css</folder>
         <folder>images</folder>
         <folder>js</folder>
     </media>
+    <languages>
+        <language tag="en-GB">language/en-GB/en-GB.plg_system_contentcustomfilter.ini</language>
+        <language tag="en-GB">language/en-GB/en-GB.plg_system_contentcustomfilter.sys.ini</language>
+        <language tag="fr-FR">language/fr-FR/fr-FR.plg_system_contentcustomfilter.ini</language>
+        <language tag="fr-FR">language/fr-FR/fr-FR.plg_system_contentcustomfilter.sys.ini</language>
+    </languages>
     <files>
         <filename plugin="contentcustomfilter">contentcustomfilter.php</filename>
         <filename>helper.php</filename>
         <filename>script.php</filename>
         <filename>LICENSE</filename>
+        <folder>language</folder>
         <folder>media</folder>
     </files>
 </extension>
