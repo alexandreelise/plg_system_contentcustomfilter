@@ -108,6 +108,7 @@ class PlgSystemContentcustomfilter extends CMSPlugin
 		// usage: ?filterfield[article-test-field]=hello&filterfield[is-done]=1
 		$suggestedFilters = $this->app->input->get('filterfield', [], 'ARRAY');
 		
+		
 		// special uri var to include or exclude items based on the filters above
 		$isIncluded = $this->app->input->getBool('is_included', true);
 		
@@ -116,21 +117,8 @@ class PlgSystemContentcustomfilter extends CMSPlugin
 		
 		$excludedFilter = (!$isIncluded && !ContentCustomFilterHelper::hasCustomFieldInFilters($customFields, $suggestedFilters));
 		
-		$view  = $this->app->input->getCmd('view');
-		$model = null;
-		if (null !== $view)
+		if (($includedFilter && !$excludedFilter) || (!$includedFilter && $excludedFilter))
 		{
-			BaseDatabaseModel::addIncludePath(JPATH_SITE . '/components/com_content/models');
-			
-			$model = BaseDatabaseModel::getInstance(ucfirst($view), 'ContentModel', ['ignore_request' => true]);
-		}
-		
-		
-		if (($includedFilter && !$excludedFilter) || ($excludedFilter && !$includedFilter))
-		{
-			
-			//$dom = (new DOMDocument());
-			
 			
 			//"highlight" filtered items
 			if (!empty($item->introtext))

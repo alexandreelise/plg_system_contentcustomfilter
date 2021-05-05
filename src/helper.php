@@ -39,31 +39,76 @@ abstract class ContentCustomFilterHelper
 			return false;
 		}
 		
+		// fields indexed by id
+		$idMapping = self::getCustomFieldsByKey($fields, 'id');
+		
+		// fields indexed by name
 		$nameMapping = self::getCustomFieldsByKey($fields, 'name');
 		
-		$outcome = true;
+		$outcome = false;
 		
-		foreach ($suggestedFilters as $suggestedFilterName => $suggestedFilterValue)
+		foreach ($suggestedFilters as $suggestedFilterKey => $suggestedFilterValue)
 		{
-			if (!isset($nameMapping[$suggestedFilterName]))
+			$matchingField = null;
+			if (isset($nameMapping[$suggestedFilterKey]))
+			{
+				$matchingField = $nameMapping[$suggestedFilterKey];
+			}
+			elseif (isset($idMapping[$suggestedFilterKey]))
+			{
+				$matchingField = $idMapping[$suggestedFilterKey];
+			}
+			
+			//stop early
+			if (!isset($matchingField))
 			{
 				continue;
 			}
-			$matchingField = $nameMapping[$suggestedFilterName];
 			
-			
-			switch ($matchingField->type)
+			if ($matchingField->type === 'color')
 			{
-				case 'color':
-					$outcome = ($outcome && (str_replace('#', '',$matchingField->rawvalue) === $suggestedFilterValue));
-					break;
-				case 'calendar':
-					$outcome = ($outcome && (strtotime($matchingField->rawvalue) === strtotime(rawurldecode($suggestedFilterValue))));
-					break;
-				default:
-					$outcome = ($outcome && ($matchingField->rawvalue === $suggestedFilterValue));
-					break;
+				if (is_array($suggestedFilterValue))
+				{
+					// multiple values case-insensitive match for colors eg: fF00aB
+					$outcome = in_array(str_replace('#', '', $matchingField->rawvalue), $suggestedFilterValue, false);
+				}
+				elseif (is_string($suggestedFilterValue))
+				{
+					// single value case-insensitive contains pattern of hexadecimal color
+					$outcome = (stripos(str_replace('#', '', $matchingField->rawvalue), $suggestedFilterValue) !== false);
+					
+				}
 			}
+			elseif ($matchingField->type === 'calendar')
+			{
+				
+				if (is_array($suggestedFilterValue))
+				{
+					// multiple values exact match comparison between strtotime (unix timestamps)
+					$outcome = (in_array(strtotime($matchingField->rawvalue), array_map(function ($item) {
+							return strtotime(rawurldecode($item));
+						}, $suggestedFilterValue), true));
+				}
+				elseif (is_string($suggestedFilterValue))
+				{
+					// single value exact match between two unix timestamps
+					$outcome = (strtotime($matchingField->rawvalue) === strtotime(rawurldecode($suggestedFilterValue)));
+				}
+			}
+			else
+			{
+				if (is_array($suggestedFilterValue))
+				{
+					//multiple values case-insensitive match for all other custom field types mainly used for text compare
+					$outcome = in_array($matchingField->rawvalue, $suggestedFilterValue, false);
+				}
+				elseif (is_string($suggestedFilterValue))
+				{
+					// single value case-insensitive contains pattern of text matching
+					$outcome = (stripos($matchingField->rawvalue, $suggestedFilterValue) !== false);
+				}
+			}
+			
 		}
 		
 		return $outcome;
@@ -81,20 +126,5 @@ abstract class ContentCustomFilterHelper
 	private static function getCustomFieldsByKey(array $fields, $key)
 	{
 		return ArrayHelper::pivot($fields, (string) $key);
-	}
-	
-	
-	/**
-	 * Prepare field data for easier filtering
-	 *
-	 * @param   array  $fields
-	 *
-	 * @return array
-	 */
-	private static function prepareMinimalFilterData(array $fields)
-	{
-		$customFieldsByName = self::getCustomFieldsByKey($fields, 'name');
-		
-		return array_combine(array_keys($customFieldsByName), array_column($customFieldsByName, 'rawvalue'));
 	}
 }

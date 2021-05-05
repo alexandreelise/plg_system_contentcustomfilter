@@ -7,7 +7,7 @@
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
     <authorEmail>contact@alexandre-elise.fr</authorEmail>
     <authorUrl>https://coderparlerpartager.fr</authorUrl>
-    <version>1.0.0</version>
+    <version>2.0.0</version>
     <description>System - Content Custom Filter. Custom fields filter plugin using Joomla! core features.</description>
     <scriptfile>script.php</scriptfile>
     <media folder="media" destination="plg_system_contentcustomfilter">
