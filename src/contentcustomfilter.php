@@ -13,13 +13,8 @@
 
 defined('_JEXEC') or die;
 
-use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
-use Joomla\CMS\Language\Text;
-use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Plugin\CMSPlugin;
-use Joomla\CMS\Version;
-use Joomla\Registry\Registry;
 
 JLoader::register('FieldsHelper', JPATH_ADMINISTRATOR . '/components/com_fields/helpers/fields.php');
 JLoader::register('ContentCustomFilterHelper', __DIR__ . '/helper.php');
@@ -82,12 +77,14 @@ class PlgSystemContentcustomfilter extends CMSPlugin
 			return true;
 		}
 		
+		$isCategory   = false;
+		$customFields = [];
 		switch ($context)
 		{
 			case 'com_content.categories':
-			case 'com_content.category':
-				$customFields = FieldsHelper::getFields('com_content.category', $item, false);
+				$isCategory = true;
 				break;
+			case 'com_content.category':
 			case 'com_content.featured':
 			case 'com_content.archive':
 			case 'com_content.article':
@@ -95,84 +92,43 @@ class PlgSystemContentcustomfilter extends CMSPlugin
 				$customFields = FieldsHelper::getFields('com_content.article', $item, false);
 				break;
 			default:
-				$customFields = [];
 				break;
 		}
 		
-		// if no custom fields found stop here
-		if (empty($customFields))
+		if ($isCategory)
 		{
-			return true;
-		}
-		
-		// get user defined custom filters to filter custom fields by name
-		// usage: ?filterfield[article-test-field]=hello&filterfield[is-done]=1
-		$suggestedFilters = $this->app->input->get('filterfield', [], 'ARRAY');
-		
-		
-		// special uri var to include or exclude items based on the filters above
-		$isIncluded = $this->app->input->getBool('is_included', true);
-		
-		
-		$includedFilter = ($isIncluded && ContentCustomFilterHelper::hasCustomFieldInFilters($customFields, $suggestedFilters));
-		
-		$excludedFilter = (!$isIncluded && !ContentCustomFilterHelper::hasCustomFieldInFilters($customFields, $suggestedFilters));
-		
-		if (($includedFilter && !$excludedFilter) || (!$includedFilter && $excludedFilter))
-		{
+			$articles = ContentCustomFilterHelper::getArticlesFromCategoryId((int) $this->app->input->getInt('id', $item->id ?? 0));
 			
-			//"highlight" filtered items
-			if (!empty($item->introtext))
-			{
-				$item->text = '<div class="contentcustomfilter filtered-item hasTooltip" title="'.Text::_('PLG_SYSTEM_CONTENTCUSTOMFILTER_MATCHING_FILTER_TOOLTIP_TEXT').'" target="_blank" rel="noopener">' . $item->text . '</div>';
-			}
-			else
-			{
-				$item->text = Text::_('PLG_SYSTEM_CONTENTCUSTOMFILTER_MATCHING_FILTER_WITH_NO_INTROTEXT') . ' ' . $item->text;
-			}
-			
-			// collect filtered items ids
-			if (!isset($filteredItems))
-			{
-				$filteredItems = $this->app->getUserState('plg_system_contentcustomfilter.filtered.items', []);
-			}
-			
-			// prevent duplicate filtered items ids
-			if (!in_array($item->id, $filteredItems, true))
-			{
-				$filteredItems[] = $item->id;
-				$this->app->setUserState('plg_system_contentcustomfilter.filtered.items', $filteredItems);
-			}
-		}
-		else
-		{
-			if (empty($suggestedFilters))
+			// if no articles in category stop here
+			if (!isset($articles))
 			{
 				return true;
 			}
 			
-			$isJ4 = (Version::MAJOR_VERSION === 4);
-			
-			$nullDate           = ($isJ4 ? null : Factory::getDbo()->getNullDate());
-			$item               = new stdClass();
-			$item->params       = new Registry();
-			$item->event        = new stdClass();
-			$item->text         = '';
-			$item->publish_down = $nullDate;
-			$item->publish_up   = $nullDate;
-			$item->state        = 1;
-			$item->images       = '';
-			$item->urls         = '';
+			foreach ($articles as $article)
+			{
+				$customFields = FieldsHelper::getFields('com_content.article', $article, false);
+				//TODO: find a way to handle category list articles for now it's not working as expected
+				ContentCustomFilterHelper::processItem($article, $customFields);
+			}
+		}
+		else
+		{
+			ContentCustomFilterHelper::processItem($item, $customFields);
 		}
 		
 		return true;
 	}
 	
+	
 	public function onBeforeCompileHead()
 	{
 		if ($this->app->isClient('site'))
 		{
-			HTMLHelper::_('stylesheet', 'plg_system_contentcustomfilter/style.css', ['relative' => true, 'auto' => true]);
+			if (((int) ($this->params->get('enable_article_styling', 1))) === 1)
+			{
+				HTMLHelper::_('stylesheet', 'plg_system_contentcustomfilter/style.css', ['relative' => true, 'version' => 'auto']);
+			}
 		}
 	}
 }

@@ -29,4 +29,29 @@
         <folder>language</folder>
         <folder>media</folder>
     </files>
+
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field name="enable_article_styling"
+                       type="radio"
+                       default="1"
+                       label="PLG_SYSTEM_CONTENTCUSTOMFILTER_ENABLE_ARTICLE_STYLING_LABEL"
+                       description="PLG_SYSTEM_CONTENTCUSTOMFILTER_ENABLE_ARTICLE_STYLING_DESCRIPTION"
+                >
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field name="enable_collect_filtered_ids"
+                       type="radio"
+                       default="0"
+                       label="PLG_SYSTEM_CONTENTCUSTOMFILTER_ENABLE_COLLECT_FILTERED_IDS_LABEL"
+                       description="PLG_SYSTEM_CONTENTCUSTOMFILTER_ENABLE_COLLECT_FILTERED_IDS_DESCRIPTION"
+                >
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+            </fieldset>
+        </fields>
+    </config>
 </extension>
